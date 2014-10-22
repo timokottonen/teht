@@ -6,9 +6,11 @@ import scala.annotation.tailrec
 object ProjectEuler {
 
   def main(args: Array[String]): Unit = {
-    println(problem2)
-    println(problem4)
-    println(problem9)
+    println(problem2 + " == 4613732")
+    println(problem4 + " == 906609")
+    println(problem9 + " == 31875000")
+    println(problem18(triangle("problem18_triangle")) + " == 1074")
+    //println(problem67(triangle("problem67_triangle")) + " == 7273")
   }
   /*
    * Even Fibonacci numbers
@@ -20,17 +22,19 @@ object ProjectEuler {
    *
    * By considering the terms in the Fibonacci sequence whose values do not
    * exceed four million, find the sum of the even-valued terms.
-   * 
-   * "Problem 2" should "find the sum of the even valued fib terms below 4M" in 
-    ProjectEuler.problem2() should be(4613732)
    */
 
-  def problem2(): Int = fib(1, 1, Nil)
+  // Käydään läpi kaikki fibonacin lukujonon arvot,
+  // jotka ovat pienempiä kuin 4 miljoonaa. Jos luku on parillinen,
+  // sen arvo lisätään summaan. Lopuksi palautetaan summa.
+
+  def problem2(): Int = fib(1, 1, 0)
 
   @tailrec
-  def fib(a: Int, b: Int, parilliset: List[Int]): Int =
-    if (a > 4000000) parilliset.sum
-    else fib(b, a + b, if (a % 2 == 0) a :: parilliset else parilliset)
+  def fib(a: Int, b: Int, summa: Int): Int =
+    if (a > 4000000) summa
+    else fib(b, a + b, if (a % 2 == 0) a + summa else summa)
+
   /*
    * Largest palindrome product
    *
@@ -38,23 +42,27 @@ object ProjectEuler {
    * from the product of two 2-digit numbers is 9009 = 91 × 99.
    *
    * Find the largest palindrome made from the product of two 3-digit numbers.
-   * 
-   * "Problem 4" should "find the largest palindrome made from the product of two 3-digit numbers" in
-     ProjectEuler.problem4() should be(906609)
-   *
    */
+
+  // Etsii kahden sisäkkäisen juoksevan numeron avulla tuloja,
+  // jotka toteuttavat palindromin vaatimukset.
+  // Lopuksi tallennetuista palindromeista haetaan suurin.
+
+  def onPalindromi(numStr: String): Boolean = {
+    val palindromi = (numStr == numStr.reverse)
+    if (palindromi) true
+    else false
+  }
+
   def problem4(): Int = {
     val palindromit = for {
       x <- 999 to 100 by -1;
       y <- 999 to 100 by -1;
-      val tulo = x * y; if (onPalindromi(tulo.toString))
+      val tulo = x * y;
+      if (onPalindromi(tulo.toString))
     } yield tulo
     palindromit.max
   }
-
-  def onPalindromi(numStr: String): Boolean = 
-    if (numStr == numStr.reverse) true
-    else false
 
   /*
    * Special Pythagorean triplet
@@ -66,10 +74,19 @@ object ProjectEuler {
    *
    * There exists exactly one Pythagorean triplet for which a + b + c = 1000.
    * Find the product abc.
-   * 
-   * "Problem 9" should "find the product abc for the pythagorean triplet for which a + b + c = 1000" in {
-      ProjectEuler.problem9() should be(31875000)
    */
+
+  // Etsii kahden sisäkkäisen juoksevan numeron avulla c:n arvoa,
+  // joka toteuttaa tripletin vaatimukset.
+  // Koska tiedetään, että tuloksia voi olla vain yksi,
+  // palautetaan listan ensimmäinen elementti
+
+  def onTriplet(a: Int, b: Int, c: Int): Boolean = {
+    val triplet = (a * a) + (b * b) == c * c
+    if (triplet) true
+    else false
+  }
+
   def problem9(): Int = {
     val tulos = for {
       a <- 1 to 999;
@@ -77,12 +94,6 @@ object ProjectEuler {
       val c = 1000 - (a + b); if (onTriplet(a, b, c))
     } yield a * b * c
     tulos.head
-  }
-
-  def onTriplet(a: Int, b: Int, c: Int): Boolean = {
-    val triplet = (a * a) + (b * b) == c * c
-    if (triplet) true
-    else false
   }
 
   /*
@@ -100,11 +111,29 @@ object ProjectEuler {
    *
    * Find the maximum total from top to bottom of the given triangle with 15
    * rows:
-   * 
-   * "Problem 18" should "Find the maximum total from top to bottom of the given triangle" in
-    ProjectEuler.problem18(triangle("/problem18_triangle.txt")) should be(1074)
    */
-  def problem18(triangle: List[List[Int]]): Int = ???
+
+  /* 
+   * Etenee kolmion huipulta pohjalle.
+   * Tarkistaa kaikki mahdolliset reitit ja etsii sen reitin,
+   * joka tuottaa suurimman tuloksen
+   */
+
+  def problem18(triangle: List[List[Int]]): Int = maxPath(triangle)
+
+  def maxPath(
+    triangle: List[List[Int]],
+    rivi: Int = 0,
+    sarake: Int = 0): Int = {
+    if (rivi == triangle.length) 0
+    else {
+      val nykyinen = triangle(rivi)(sarake)
+      val reitti1 = maxPath(triangle, rivi + 1, sarake)
+      val reitti2 = maxPath(triangle, rivi + 1, sarake + 1)
+      val parasReitti = (reitti1 max reitti2)
+      nykyinen + parasReitti
+    }
+  }
 
   /*
    * Maximum path sum II
@@ -127,10 +156,8 @@ object ProjectEuler {
    * altogether! If you could check one trillion (10^12) routes every second it
    * would take over twenty billion years to check them all. There is an
    * efficient algorithm to solve it. ;o)
-   * 
-   * "Problem 67" should "find the maximum total from top to bottom in the given huge triangle" in {
-    ProjectEuler.problem67(triangle("/problem67_triangle.txt")) should be(7273)
    */
+
   def problem67(triangle: List[List[Int]]): Int = ???
 
   def triangle(resource: String): List[List[Int]] = scala.io.Source
