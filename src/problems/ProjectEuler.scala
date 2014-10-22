@@ -1,9 +1,14 @@
-package problems
+
+package src.problems
+
+import scala.annotation.tailrec
 
 object ProjectEuler {
-  
-  def main (args:Array[String]):Unit = {
-    println("moi")
+
+  def main(args: Array[String]): Unit = {
+    println(problem2)
+    println(problem4)
+    println(problem9)
   }
   /*
    * Even Fibonacci numbers
@@ -15,19 +20,41 @@ object ProjectEuler {
    *
    * By considering the terms in the Fibonacci sequence whose values do not
    * exceed four million, find the sum of the even-valued terms.
+   * 
+   * "Problem 2" should "find the sum of the even valued fib terms below 4M" in 
+    ProjectEuler.problem2() should be(4613732)
    */
-  def problem2(): Int = ???
 
+  def problem2(): Int = fib(1, 1, Nil)
+
+  @tailrec
+  def fib(a: Int, b: Int, parilliset: List[Int]): Int =
+    if (a > 4000000) parilliset.sum
+    else fib(b, a + b, if (a % 2 == 0) a :: parilliset else parilliset)
   /*
    * Largest palindrome product
    *
    * A palindromic number reads the same both ways. The largest palindrome made
-   * from the product of two 2-digit numbers is 9009 = 91 Ã— 99.
+   * from the product of two 2-digit numbers is 9009 = 91 × 99.
    *
    * Find the largest palindrome made from the product of two 3-digit numbers.
+   * 
+   * "Problem 4" should "find the largest palindrome made from the product of two 3-digit numbers" in
+     ProjectEuler.problem4() should be(906609)
    *
    */
-  def problem4(): Int = ???
+  def problem4(): Int = {
+    val palindromit = for {
+      x <- 999 to 100 by -1;
+      y <- 999 to 100 by -1;
+      val tulo = x * y; if (onPalindromi(tulo.toString))
+    } yield tulo
+    palindromit.max
+  }
+
+  def onPalindromi(numStr: String): Boolean = 
+    if (numStr == numStr.reverse) true
+    else false
 
   /*
    * Special Pythagorean triplet
@@ -39,9 +66,24 @@ object ProjectEuler {
    *
    * There exists exactly one Pythagorean triplet for which a + b + c = 1000.
    * Find the product abc.
+   * 
+   * "Problem 9" should "find the product abc for the pythagorean triplet for which a + b + c = 1000" in {
+      ProjectEuler.problem9() should be(31875000)
    */
-  def problem9(): Int = ???
+  def problem9(): Int = {
+    val tulos = for {
+      a <- 1 to 999;
+      b <- 1 to 999;
+      val c = 1000 - (a + b); if (onTriplet(a, b, c))
+    } yield a * b * c
+    tulos.head
+  }
 
+  def onTriplet(a: Int, b: Int, c: Int): Boolean = {
+    val triplet = (a * a) + (b * b) == c * c
+    if (triplet) true
+    else false
+  }
 
   /*
    * Maximum path sum I
@@ -58,6 +100,9 @@ object ProjectEuler {
    *
    * Find the maximum total from top to bottom of the given triangle with 15
    * rows:
+   * 
+   * "Problem 18" should "Find the maximum total from top to bottom of the given triangle" in
+    ProjectEuler.problem18(triangle("/problem18_triangle.txt")) should be(1074)
    */
   def problem18(triangle: List[List[Int]]): Int = ???
 
@@ -82,6 +127,17 @@ object ProjectEuler {
    * altogether! If you could check one trillion (10^12) routes every second it
    * would take over twenty billion years to check them all. There is an
    * efficient algorithm to solve it. ;o)
+   * 
+   * "Problem 67" should "find the maximum total from top to bottom in the given huge triangle" in {
+    ProjectEuler.problem67(triangle("/problem67_triangle.txt")) should be(7273)
    */
   def problem67(triangle: List[List[Int]]): Int = ???
+
+  def triangle(resource: String): List[List[Int]] = scala.io.Source
+    .fromURL(getClass.getResource(resource))
+    .getLines
+    .toList
+    .map(toListOfInts)
+
+  def toListOfInts(s: String) = s.split(" ").map(_.toInt).toList
 }
