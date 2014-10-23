@@ -10,7 +10,7 @@ object ProjectEuler {
     println(problem4 + " == 906609")
     println(problem9 + " == 31875000")
     println(problem18(triangle("problem18_triangle")) + " == 1074")
-    //println(problem67(triangle("problem67_triangle")) + " == 7273")
+    println(problem67(triangle("problem67_triangle")) + " == 7273")
   }
   /*
    * Even Fibonacci numbers
@@ -58,8 +58,7 @@ object ProjectEuler {
     val palindromit = for {
       x <- 999 to 100 by -1;
       y <- 999 to 100 by -1;
-      val tulo = x * y;
-      if (onPalindromi(tulo.toString))
+      val tulo = x * y; if (onPalindromi(tulo.toString))
     } yield tulo
     palindromit.max
   }
@@ -79,7 +78,7 @@ object ProjectEuler {
   // Etsii kahden sisäkkäisen juoksevan numeron avulla c:n arvoa,
   // joka toteuttaa tripletin vaatimukset.
   // Koska tiedetään, että tuloksia voi olla vain yksi,
-  // palautetaan listan ensimmäinen elementti
+  // palautetaan listan ensimmäinen elementti.
 
   def onTriplet(a: Int, b: Int, c: Int): Boolean = {
     val triplet = (a * a) + (b * b) == c * c
@@ -113,11 +112,9 @@ object ProjectEuler {
    * rows:
    */
 
-  /* 
-   * Etenee kolmion huipulta pohjalle.
-   * Tarkistaa kaikki mahdolliset reitit ja etsii sen reitin,
-   * joka tuottaa suurimman tuloksen
-   */
+  // Etenee kolmion huipulta pohjalle.
+  // Tarkistaa kaikki mahdolliset reitit ja etsii sen reitin,
+  // joka tuottaa suurimman tuloksen.
 
   def problem18(triangle: List[List[Int]]): Int = maxPath(triangle)
 
@@ -158,7 +155,26 @@ object ProjectEuler {
    * efficient algorithm to solve it. ;o)
    */
 
-  def problem67(triangle: List[List[Int]]): Int = ???
+  // Navigoi kolmion huipulta pohjalle suurimmasta luvusta suurimpaan.
+  // Ei ota huomioon, että liikkumalla pienempään lukuun voitaisiin saada
+  // suurempi kokonaissumma. Ei anna oikeaa arvoa tulokseksi.
+
+  def problem67(triangle: List[List[Int]]): Int = findMaxPath(triangle)
+
+  @tailrec
+  def findMaxPath(
+    triangle: List[List[Int]],
+    rivi: Int = 0,
+    sarake: Int = 0,
+    summa: Int = 0): Int = {
+    lazy val vasen = triangle(rivi + 1)(sarake)
+    lazy val oikea = triangle(rivi + 1)(sarake + 1)
+    if (triangle.length == 1) summa
+    else {
+      if (vasen > oikea) findMaxPath(triangle.tail, rivi, sarake, vasen + summa)
+      else findMaxPath(triangle.tail, rivi, sarake + 1, oikea + summa)
+    }
+  }
 
   def triangle(resource: String): List[List[Int]] = scala.io.Source
     .fromURL(getClass.getResource(resource))
